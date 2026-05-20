@@ -4,32 +4,32 @@ import time
 import random
 import pydirectinput as pyd
 from rapidocr import RapidOCR
+import keyboard as kbd
 
 #ocr = RapidOCR()
 
 screen_width, screen_height = gui.size()
-friendshipCoordsPixel = ((0.45 * screen_width, 0.222 * screen_height), (0.45 * screen_width, 0.315 * screen_height), (0.45 * screen_width, 0.408 * screen_height), (0.45 * screen_width, 0.501 * screen_height))
-trainingTypeCoordsPixel = ((0.447 * screen_width, 0.157 * screen_height), (0.447 * screen_width, 0.252 * screen_height), (0.447 * screen_width, 0.345 * screen_height), (0.447 * screen_width, 0.438 * screen_height))
 
-#Array of coordinates for friendship levels and training type, first value is friendship level, second is training type
-trainingCoords = (((0.45 * screen_width, 0.222 * screen_height), (0.447 * screen_width, 0.157 * screen_height)), 
-                  ((0.45 * screen_width, 0.315 * screen_height), (0.447 * screen_width, 0.252 * screen_height)), 
-                  ((0.45 * screen_width, 0.408 * screen_height), (0.447 * screen_width, 0.345 * screen_height)), 
-                  ((0.45 * screen_width, 0.501 * screen_height), (0.447 * screen_width, 0.438 * screen_height)),
-                  ((0.45 * screen_width, 0.597 * screen_height), (0.447 * screen_width, 0.533 * screen_height)),)
+#Possible coordinates for dialogue boxes, white for each dialogue option
+eventDialogueCoords = ((int(0.152 * screen_width), int(0.7 * screen_height)),
+                       (int(0.152 * screen_width), int(0.598 * screen_height)),
+                       (int(0.152 * screen_width), int(0.496 * screen_height)))
+
 
 #Friendship Lvl 0: (110, 107, 121) Gray
 #Friendship Lvl 1: (42, 192, 255) Blue
 #Friendship Lvl 2: (162, 230, 30) Green
 #Friendship Lvl 3: (255, 173, 30) Orange
+#Friendship lvl max: (255, 235, 120) Yellow
 
 #Speed Friend:      (60, 190, 255)
 #Stamina Friend:    (255, 133, 115)
 #Power Friend:      (255, 171, 16)
+#Wit Friend:        (26, 210, 156)
 
 def press(key):
     pyd.press(key)
-    time.sleep(random.uniform(0.1, 0.3))
+    time.sleep(random.uniform(0.05, 0.1))
 
 def gotoRest():
     for i in range(4):
@@ -41,6 +41,7 @@ def gotoRest():
 def gotoTraining():
     gotoRest()
     press('d')
+    press('enter')
 
 def gotoSkills():
     gotoTraining()
@@ -48,25 +49,32 @@ def gotoSkills():
 
 def gotoInfirmary():
     gotoRest()
-    press('s')
-    
+    press('s')   
 
 def gotoRecreation():
     gotoTraining()
-    press('s')
-    
+    press('s')  
 
 def gotoRaces():
     gotoSkills()
     press('s')
     
-#Gets number of friends in each training, to maximize building friendship levels, doesn't count max friendships
-#ToDo: If max level, check for friendship type, if type matches with training, count as friendship training
-#Speed Friend:      (60, 190, 255)
-#Stamina Friend:    (255, 133, 115)
-#Power Friend:      (255, 171, 16)
-#Wit Friend:        (26, 210, 156)
+#Gets number of friendships and bond trainings for a single training
 def trainingValue(trainingType):
+
+    #Array of coordinates for friendship levels and training type, first value is friendship level, second is training type
+    trainingCoords = (((int(0.45 * screen_width), int(0.222 * screen_height)), (int(0.447 * screen_width), int(0.157 * screen_height))), 
+                  ((int(0.45 * screen_width), int(0.315 * screen_height)), (int(0.447 * screen_width), int(0.252 * screen_height))), 
+                  ((int(0.45 * screen_width), int(0.408 * screen_height)), (int(0.447 * screen_width), int(0.345 * screen_height))), 
+                  ((int(0.45 * screen_width), int(0.501 * screen_height)), (int(0.447 * screen_width), int(0.438 * screen_height))),
+                  ((int(0.45 * screen_width), int(0.597 * screen_height)), (int(0.447 * screen_width), int(0.533 * screen_height)))
+    )
+
+    #Speed Friend:      (60, 190, 255)
+    #Stamina Friend:    (255, 133, 115)
+    #Power Friend:      (255, 171, 16)
+    #Wit Friend:        (26, 210, 156)
+
     friendshipLevels = [(110, 107, 121), (42, 192, 255), (162, 230, 30), (255, 173, 30)]
     maxFriendshipLevels = (255, 173, 30)
 
@@ -76,94 +84,84 @@ def trainingValue(trainingType):
     }
 
     for pairs in trainingCoords:
-        supportFriend = False
-        characterPresent = False
-        maxFriendship = False
+        supportFriend = False       #Whether or not character is support or NPC, NPC trainings aren't considered for bondings
+        characterPresent = False    #Whether a bondable character is present, max bonds on unmatching trainings don't count
+        maxFriendship = False       #Whether a support is on max bond, used to check for friendship trainings
 
-        if gui.pixelMatchesColor(int(pairs[0][0]), int(pairs[0][1]), (110, 107, 121), tolerance=10):
-            print("Friendship level 0")
+        if gui.pixelMatchesColor(pairs[0][0], pairs[0][1], (110, 107, 121), tolerance=10):
+            #print("Friendship level 0")
             characterPresent = True
-        elif gui.pixelMatchesColor(int(pairs[0][0]), int(pairs[0][1]), (42, 192, 255), tolerance=10):
-            print("Friendship level 1")
+        elif gui.pixelMatchesColor(pairs[0][0], pairs[0][1], (42, 192, 255), tolerance=10):
+            #print("Friendship level 1")
             characterPresent = True
-        elif gui.pixelMatchesColor(int(pairs[0][0]), int(pairs[0][1]), (162, 230, 30), tolerance=10):
-            print("Friendship level 2")
+        elif gui.pixelMatchesColor(pairs[0][0], pairs[0][1], (162, 230, 30), tolerance=10):
+            #print("Friendship level 2")
             characterPresent = True
-        elif gui.pixelMatchesColor(int(pairs[0][0]), int(pairs[0][1]), (255, 173, 30), tolerance=10):
-            print("Friendship level max")
-            characterPresent = True
+        elif gui.pixelMatchesColor(pairs[0][0], pairs[0][1], (255, 173, 30), tolerance=10) or gui.pixelMatchesColor(pairs[0][0], pairs[0][1], (255, 235, 120), tolerance=10):
+            #print("Friendship level max")
             maxFriendship = True
         else:
-            print("No-one here")
-            return
+            #print("No-one here")
+            #print(trainingType, "\n", trainings)
+            return trainings
     
         if gui.pixelMatchesColor(int(pairs[1][0]), int(pairs[1][1]), (60, 190, 255), tolerance=10):
-            print("Speed friend")
+            #print("Speed friend")
             if trainingType == "speed" and maxFriendship:
                 trainings["friendships"] += 1
-            else:
+            elif characterPresent:
                 trainings["bonding"] += 1
             supportFriend = True
         elif gui.pixelMatchesColor(int(pairs[1][0]), int(pairs[1][1]), (255, 133, 115), tolerance=10):
-            print("Stamina friend")
+            #print("Stamina friend")
             if trainingType == "stamina" and maxFriendship:
                 trainings["friendships"] += 1
-            else:
+            elif characterPresent:
                 trainings["bonding"] += 1
             supportFriend = True
         elif gui.pixelMatchesColor(int(pairs[1][0]), int(pairs[1][1]), (255, 171, 16), tolerance=10):
-            print("Power friend") 
+            #print("Power friend") 
             if trainingType == "power" and maxFriendship:
                 trainings["friendships"] += 1
-            else:
+            elif characterPresent:
                 trainings["bonding"] += 1
             supportFriend = True
         elif gui.pixelMatchesColor(int(pairs[1][0]), int(pairs[1][1]), (26, 210, 156), tolerance=10):
-            print("Wit friend")
+            #print("Wit friend")
             if trainingType == "wit" and maxFriendship:
                 trainings["friendships"] += 1
-            else:
+            elif characterPresent:
                 trainings["bonding"] += 1
             supportFriend = True
 
-        if characterPresent and not supportFriend:
-            print("Director or Reporter")
+        #if characterPresent and not supportFriend:
+            #print("Director or Reporter")
     
-    print(trainings)
+    #print(trainingType, "\n", trainings)
     return trainings
 
 #Goes through each training and checks for most valuable training friendship wise
 def checkTrainings():
-    friendshipBuilding = {
-        "speed": 0,
-        "stamina": 0,
-        "power": 0,
-        "guts": 0,
-        "wit": 0
-    }
-    friendshipTraining = {
-        "speed": 0,
-        "stamina": 0,
-        "power": 0,
-        "guts": 0,
-        "wit": 0
-    }
+
+    trainingTypes = ["speed", "stamina", "power", "guts", "wit"]
+
+    trainingValues = {}
 
     gotoTraining()
     
-    press('enter')
     #Set cursor to "speed training"
     for i in range(6):
         press('a')
     press('w')
 
     #Iterates through each training, assigning values live
-    for key, value in friendshipBuilding.items():
-        friendshipBuilding[key] = trainingValue(key)
+    for type in trainingTypes:
+        trainingValues[type] = trainingValue(type)
+        print("Stats for ", type)
+        print(trainingValues[type], "\n ========================")
         press('d')
-    
-    print(friendshipBuilding)
-    return (friendshipBuilding, friendshipTraining)
+
+    return trainingValues
 
 #Checks energy bar, returns 0-20 based on how full energy bar is, assumes default max energy of 100
 def checkEnergy():
@@ -205,6 +203,7 @@ def checkMood():
     return -1
 
 #Gets racing affinities; track, distance, and style
+#May be redundant if using career preset races
 def checkAffinities():
 
     raceAffinities = {
@@ -243,13 +242,35 @@ def checkAffinities():
     print(raceAffinities)
     return
 
+#ToDo
+#def checkStats():
 
-#gw.getWindowsWithTitle('Umamusume')[0].activate()
-#checkTrainings()
-#print("Energy level: ",checkEnergy(), "/ 20")
-#print(checkMood())
-#gui.screenshot(region=(100, 100, 200, 200)).save("images/test.png")
-#checkAffinities()
+def main():
+    running = True
+    def stopProgram():
+        nonlocal running
+        running = False
 
-trainingValue()
+    kbd.add_hotkey('end', stopProgram)
+
+    #72 turns + 6 finale turns and races
+    turn = [0] * 78
+    # 1-12          13-24         25-36         37-48           49-60         61-72         73-78
+    #Predebut", "Postdebut", "EarlyClassic", "LateClassic", "EarlySenior", "LateSenior", "Finales")\
+    #Predebut: Focus on bonding trainings
+    #Postdebut: Focus on bonding, start shifting towards friendship trainings if possible
+    #EarlyClassic & onward: Focus on friendship trainings, only do bonding if no high friendship trainings available
+
+    currentMood = 2 #0-4, awful to great, starting mood is normal, prioritize keeping mood at least good (3), if below 2, add weight to recreation
+    currentEnergy = 20 #0-20, starting energy is 20, try to keep above 10, if below 10 add weight to rest, lower energy = more weight to rest, needs to be exponential as chances of failure scales exponentially as energy decreases
+    currentStats = {"speed": 0,"stamina": 0,"power": 0,"guts": 0,"wit": 0} #0-1200, purpose of trainer bot is to get at least speed, stamina, and power over 600 for 3 star sparks, possibly wit as well with further developments
+
+    for turnIndex in range(len(turn)):
+        if not running:
+            break
+        print("Turn ", turnIndex)
+        time.sleep(1)
+
+
+
 
