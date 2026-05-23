@@ -1,8 +1,9 @@
 # UmaTrainerBot
 Simple automated bot to train legacies for Umamusume using keyboard to prevent cursor bot detection
+Intended for use on URA Finales Scenario
 
 ## Work in progress!
-Current is only able to read information from displays, cannot perform actions yet!
+Current is only able to read information from displays, cannot perform majority of actions yet!
 
 # Setup
 1. Download the files from the repository into a directory of your choosing
