@@ -5,6 +5,13 @@ Intended for use on URA Finales Scenario
 ## Work in progress!
 Current is only able to read information from displays, cannot perform majority of actions yet!
 
+Able to:
+ - Get energy levels
+ - Get mood levels
+ - Find friendship and bonding trainings
+ - Read stats
+ - Read event choices
+
 # Setup
 1. Download the files from the repository into a directory of your choosing
 2. In a cmd terminal (using VSCode as example), navigate into the folder contents were downloaded into
